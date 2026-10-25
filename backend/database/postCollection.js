@@ -92,10 +92,15 @@ const deletePost = async(postId) => {
     return await Post.findByIdAndDelete(postId);
 }
 
+const getPostByAuthorId = async(authorId) => {
+
+    return await Post.find({author : authorId});
+}
 module.exports = {
     createPost,
     getAllPosts,
     getPostById,
     updatePost,
-    deletePost
+    deletePost,
+    getPostByAuthorId
 };

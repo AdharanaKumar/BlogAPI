@@ -1,19 +1,15 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/userModel')
-
 const jwt = require('jsonwebtoken')
+const AppError = require('../utils/AppError');
 
 const handleRegistration = async (req, res) => {
-
     try{
         //access user credentials
         const {name, email, password} = req.body;
 
         if(!name || !email || !password ){
-            return res.status(400).json({
-                success: false,
-                message: "Name, email and password are required"
-            });
+            throw new AppError("Name, email and password are required", 400);
         }
 
         //check if user already exists 
@@ -21,10 +17,7 @@ const handleRegistration = async (req, res) => {
 
         if(existUser){
             //duplicate user
-            return res.status(409).json({
-                success: false,
-                message: "User  already registered"
-             });
+             throw new AppError("User  already registered", 400);
         }
 
         //hash the password
@@ -52,12 +45,7 @@ const handleRegistration = async (req, res) => {
 
 
     }catch(error){
-        // return res with "registration failed"
-          res.status(500).json({
-            success: false,
-            message: "Registration failed",
-            error: error.message
-        });
+        next(error);
      }
    
 }

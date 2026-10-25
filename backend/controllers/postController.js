@@ -2,7 +2,7 @@
 // controlls the operations(CRUD) related to posts collection
 
 const postCollection = require("../database/postCollection")
-
+const AppError = require('../utils/AppError');
 const createPost = async (req,res) => {
      try {
         const post = await postCollection.createPost(req.body);
@@ -12,29 +12,20 @@ const createPost = async (req,res) => {
             data: post
       });
 
-  } catch (error) {
-        res.status(error.statusCode || 500).json({
-            success: false,
-            message: error.message
-     });
-  }
+    }catch (error) {
+        next(error);
+    }
 };
 
 const getAllPosts = async (req,res) => {
-    try{
+    try{ 
          const posts = await postCollection.getAllPosts();
-
          res.status(200).json({
              success: true,
             data: posts
         });
     } catch(error){
-
-        res.status(500).json({
-            success: false,
-            message : "Failed to fetch posts",
-            error: error.message
-        });
+        next(error);
     }
 };
 
@@ -43,23 +34,14 @@ const getPostById = async (req,res) => {
         const post = await postCollection.getPostById(req.params.id);
 
         if(!post){
-
-            return res.status(404).json({
-                success: false,
-                message: "Post not found",
-
-            })
+            throw new AppError("Post not found", 404);
         }
          res.status(200).json({
             success: true,
             data: post
         });
     } catch (error){
-           res.status(500).json({
-                success : false,
-                message: "Failed to fetch post",
-                error : error.message
-           }) 
+        next(error);
     }
     
 };
@@ -70,10 +52,7 @@ const updatePost = async (req,res) => {
         const post = await postCollection.updatePost(req.params.id,req.body);
             
         if (!post) {
-            return res.status(404).json({
-                success: false,
-                message: "Post not found"
-            });
+            throw new AppError("Post not found", 404);
         }
 
         res.status(200).json({
@@ -81,11 +60,7 @@ const updatePost = async (req,res) => {
             data: post
         });
    }catch(error){
-    
-       res.status(error.statusCode || 500).json({
-            success: false,
-            message : error.message
-       });
+     next(error);
    }
     
 };
@@ -96,10 +71,7 @@ const deletePost = async (req,res) => {
         const post = await postCollection.deletePost(req.params.id);
 
          if (!post) {
-            return res.status(404).json({
-                success: false,
-                message: "Post not found"
-            });
+            throw new AppError("Post not found", 404);
         }
 
         res.status(200).json({
@@ -109,24 +81,32 @@ const deletePost = async (req,res) => {
         });
 
     } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: "Failed to delete post",
-            error: error.message
-        });
-  }
+        next(error);
+    }
 
 };
 
+const getPostByAuthorId = async (req,res) => {
+    try{
+        const post = await postCollection.getPostByAuthorId(req.params.id);
+
+        if(post.length == 0){
+            throw new AppError("Post not found", 404);
+        }
+         res.status(200).json({
+            success: true,
+            data: post
+        });
+    } catch (error){
+         next(error);
+    }
+    
+};
 module.exports = {
     createPost,
     getAllPosts,
     getPostById,
     updatePost,
-    deletePost
+    deletePost,
+    getPostByAuthorId
 };
-
-
-//author id : 6ab8afb4a2cfb0ebc5fb76a4
-// 

@@ -1,5 +1,6 @@
 
 const categoryCollection = require("../database/categoryCollection");
+const AppError = require('../utils/AppError');
 
 const createCategory = async (req, res) => {
   try{
@@ -11,11 +12,7 @@ const createCategory = async (req, res) => {
       });
 
   }catch(error) {
-    res.json({
-      success : false,
-      message: "Failed to create Category",
-      error : error.message
-    })
+     next(error);
   }
   
 };
@@ -30,16 +27,9 @@ const getAllCategories = async (req, res) => {
       });
 
   }catch(error){
-    
-    res.status(500).json({
-        success : false,
-        message: "Failed to fetch categories",
-        error : error.message
-    })
+    next(error);
   }
   
-
- 
 };
 
 const getCategoryById = async (req, res) => {
@@ -50,11 +40,7 @@ const getCategoryById = async (req, res) => {
      
     // if given id is valid but not exist in category collection, category become null
      if(!category){
-   
-       return res.status(404).json({
-        success: false,
-        message: "Category not found"
-      });
+        throw new AppError("Category not found", 404);
      }
 
      res.status(200).json({
@@ -63,29 +49,21 @@ const getCategoryById = async (req, res) => {
      })
 
   }catch(error){
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch category",
-      error : error.message
-    })
+    next(error);
   }
  
-
 };
 
 const updateCategory = async (req, res) => {
 
   try{
       const category = await categoryCollection.updateCategory(
-      req.params.id,
-      req.body
+        req.params.id,
+        req.body
       );
       if (!category) {
-            return res.status(404).json({
-              success: false,
-              message: "Category not found"
-            });
-        }
+          throw new AppError("Category not found", 404);
+      }
 
       res.status(200).json({
         success : true,
@@ -93,28 +71,16 @@ const updateCategory = async (req, res) => {
       });
 
   }catch (error) {
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to update category",
-      error: error.message
-    });
-
+     next(error);
   }
-
 };
 
 const deleteCategory = async (req, res) => {
   try{
      const category = await categoryCollection.deleteCategory(req.params.id);
-
       if (!category) {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found"
-      });
-    }
-
+         throw new AppError("Category not found", 404);
+      }
     res.status(200).json({
       success: true,
       message: "Category deleted successfully",
@@ -122,15 +88,9 @@ const deleteCategory = async (req, res) => {
     });
     
   }catch(error){
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete category",
-      error: error.message
-    });
+     next(error);
   }
-
-  }
+}
   
 module.exports = {
   createCategory,
